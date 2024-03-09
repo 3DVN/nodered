@@ -1,0 +1,72 @@
+[
+    {
+        "id": "a88c1475357be9ac",
+        "type": "subflow",
+        "name": "Select Random",
+        "info": "",
+        "category": "function",
+        "in": [
+            {
+                "x": 80,
+                "y": 60,
+                "wires": [
+                    {
+                        "id": "2fe140f488b2e7fa"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 400,
+                "y": 60,
+                "wires": [
+                    {
+                        "id": "2fe140f488b2e7fa",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {
+            "module": "Select Random",
+            "version": "1.0.0",
+            "author": "Devin Hamilton <devin@hamilton321.com>",
+            "desc": "Returns a random element from input array",
+            "keywords": "Random",
+            "license": "Apache-2.0"
+        },
+        "color": "#E2D96E",
+        "icon": "font-awesome/fa-random"
+    },
+    {
+        "id": "2fe140f488b2e7fa",
+        "type": "function",
+        "z": "a88c1475357be9ac",
+        "name": "Get random element",
+        "func": "function random(items) {\n    return items[Math.floor(Math.random() * items.length)];\n}\n\nmsg.payload = random(msg.payload)\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 240,
+        "y": 60,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "843dddef8a0f667b",
+        "type": "subflow:a88c1475357be9ac",
+        "z": "dc60be6f.0f1a4",
+        "name": "",
+        "x": 280,
+        "y": 220,
+        "wires": [
+            []
+        ]
+    }
+]
