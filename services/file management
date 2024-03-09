@@ -1,0 +1,474 @@
+[
+    {
+        "id": "cde03bdd1ecb13fc",
+        "type": "group",
+        "z": "743c34968311fe61",
+        "name": "File Actions",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "31c611abddd02781",
+            "2dd15c31127b84ab",
+            "11aec71b09ae1f31",
+            "fda605b95285b1d6",
+            "907d959ffbbf4bee",
+            "5361063253b49aab",
+            "b47a35cb58411c42",
+            "da9bc99fad05929d",
+            "35181a39061ce5cd",
+            "06a99f9e9ebc283c",
+            "24892b6655d77297",
+            "de43209d5ab9592d",
+            "5112413175e37138",
+            "62d7c946ed7967ab",
+            "c1c0d36299ddc1da",
+            "86ddebc7ae3346f3",
+            "e5d5b167e5922e5e",
+            "6ae36966641ae443",
+            "6eb002c2336f4af3",
+            "f720e94ed192442f",
+            "bcdeca66c0dd0bb7",
+            "fbdec5a891751067",
+            "79e81c7dae71dcc6",
+            "e2d6862394948bf7"
+        ],
+        "x": 84,
+        "y": 219,
+        "w": 1002,
+        "h": 289.5
+    },
+    {
+        "id": "31c611abddd02781",
+        "type": "link in",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "name": "Read JSON File",
+        "links": [],
+        "x": 125,
+        "y": 280,
+        "wires": [
+            [
+                "11aec71b09ae1f31"
+            ]
+        ],
+        "icon": "node-red/file-in.svg",
+        "info": "msg.payload is the full path of the file to be read"
+    },
+    {
+        "id": "2dd15c31127b84ab",
+        "type": "link out",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "name": "",
+        "mode": "return",
+        "links": [],
+        "x": 1045,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "11aec71b09ae1f31",
+        "type": "function",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "name": "Set Filename",
+        "func": "msg2 = {\n    filename: msg.payload,\n    omsg: msg\n}\nreturn msg2;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 240,
+        "y": 280,
+        "wires": [
+            [
+                "fda605b95285b1d6"
+            ]
+        ]
+    },
+    {
+        "id": "fda605b95285b1d6",
+        "type": "file in",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "name": "",
+        "filename": "",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 410,
+        "y": 280,
+        "wires": [
+            [
+                "907d959ffbbf4bee"
+            ]
+        ]
+    },
+    {
+        "id": "907d959ffbbf4bee",
+        "type": "json",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 560,
+        "y": 280,
+        "wires": [
+            [
+                "5361063253b49aab"
+            ]
+        ]
+    },
+    {
+        "id": "5361063253b49aab",
+        "type": "function",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "name": "Clean up",
+        "func": "msg2 = msg.omsg\nmsg2.payload = msg.payload\nreturn msg2;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 940,
+        "y": 280,
+        "wires": [
+            [
+                "2dd15c31127b84ab"
+            ]
+        ]
+    },
+    {
+        "id": "b47a35cb58411c42",
+        "type": "link in",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "name": "Write JSON File",
+        "links": [],
+        "x": 125,
+        "y": 340,
+        "wires": [
+            [
+                "da9bc99fad05929d"
+            ]
+        ],
+        "icon": "node-red/file-out.svg",
+        "info": "msg.payload is an object that contains a file string and a data object, which will be the payload written to the file.\n\nThis performs a full overwrite of the file\n\npayload = {\n    file: /path/to/file,\n    data: {\n        field: \"Data to be written\"\n    }\n}"
+    },
+    {
+        "id": "da9bc99fad05929d",
+        "type": "function",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "name": "Set Filename",
+        "func": "var msg2 = {\n    filename: msg.payload.file,\n    payload: msg.payload.data,\n    omsg: msg\n}\nreturn msg2;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 240,
+        "y": 340,
+        "wires": [
+            [
+                "24892b6655d77297"
+            ]
+        ]
+    },
+    {
+        "id": "35181a39061ce5cd",
+        "type": "link out",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "name": "",
+        "mode": "return",
+        "links": [],
+        "x": 795,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "06a99f9e9ebc283c",
+        "type": "function",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "name": "Clean up",
+        "func": "var msg2 = msg.omsg\ndelete msg2.payload\nreturn msg2;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 690,
+        "y": 340,
+        "wires": [
+            [
+                "35181a39061ce5cd"
+            ]
+        ]
+    },
+    {
+        "id": "24892b6655d77297",
+        "type": "json",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "name": "",
+        "property": "payload",
+        "action": "str",
+        "pretty": true,
+        "x": 400,
+        "y": 340,
+        "wires": [
+            [
+                "de43209d5ab9592d"
+            ]
+        ]
+    },
+    {
+        "id": "de43209d5ab9592d",
+        "type": "file",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "name": "",
+        "filename": "filename",
+        "filenameType": "msg",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 540,
+        "y": 340,
+        "wires": [
+            [
+                "06a99f9e9ebc283c"
+            ]
+        ]
+    },
+    {
+        "id": "5112413175e37138",
+        "type": "exec",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "command": "ls ",
+        "addpay": "payload",
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": false,
+        "oldrc": false,
+        "name": "",
+        "x": 390,
+        "y": 400,
+        "wires": [
+            [
+                "c1c0d36299ddc1da"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "62d7c946ed7967ab",
+        "type": "link in",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "name": "List Files",
+        "links": [],
+        "x": 125,
+        "y": 400,
+        "wires": [
+            [
+                "86ddebc7ae3346f3"
+            ]
+        ],
+        "icon": "font-awesome/fa-list"
+    },
+    {
+        "id": "c1c0d36299ddc1da",
+        "type": "function",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "name": "Build Response",
+        "func": "var files = msg.payload\nvar output = []\n\nif (files !== \"\") {\n    files = files.replace(/\\n$/, \"\").split(\"\\n\")\n    files.forEach(file => {\n        output.push({\n            name: file.replace(/\\.json/g, \"\"),\n            file: file,\n            path: (msg.path.split(\" | \")[0] + \"/\" + file)\n        })\n    })\n}\n\nmsg2 = msg.omsg\nmsg2.payload = output\n\nreturn msg2;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 400,
+        "wires": [
+            [
+                "e5d5b167e5922e5e"
+            ]
+        ]
+    },
+    {
+        "id": "86ddebc7ae3346f3",
+        "type": "function",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "name": "Set Path",
+        "func": "if (typeof(msg.payload) === \"string\") {\n    msg.payload = {\n        path: msg.payload\n    }\n}\nelse if (msg.payload.filter) {\n    msg.payload.path += \" | grep '\" + msg.payload.filter + \"'\"\n    delete msg.payload.filter\n}\n\nvar msg2 = {\n    path: msg.payload.path,\n    payload: msg.payload.path,\n    //format: msg.payload.format || \"object\",\n    omsg: msg\n}\nreturn msg2;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 240,
+        "y": 400,
+        "wires": [
+            [
+                "5112413175e37138"
+            ]
+        ]
+    },
+    {
+        "id": "e5d5b167e5922e5e",
+        "type": "link out",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "name": "",
+        "mode": "return",
+        "links": [],
+        "x": 685,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "6ae36966641ae443",
+        "type": "catch",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "name": "",
+        "scope": [
+            "fda605b95285b1d6"
+        ],
+        "uncaught": false,
+        "x": 670,
+        "y": 260,
+        "wires": [
+            [
+                "6eb002c2336f4af3"
+            ]
+        ]
+    },
+    {
+        "id": "6eb002c2336f4af3",
+        "type": "function",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "name": "Empty",
+        "func": "msg.payload = {}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 790,
+        "y": 260,
+        "wires": [
+            [
+                "5361063253b49aab"
+            ]
+        ]
+    },
+    {
+        "id": "f720e94ed192442f",
+        "type": "link in",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "name": "Delete File",
+        "links": [],
+        "x": 125,
+        "y": 460,
+        "wires": [
+            [
+                "bcdeca66c0dd0bb7"
+            ]
+        ],
+        "icon": "font-awesome/fa-trash-o"
+    },
+    {
+        "id": "bcdeca66c0dd0bb7",
+        "type": "function",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "name": "Set Path",
+        "func": "msg.payload = msg.payload.file\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 240,
+        "y": 460,
+        "wires": [
+            [
+                "fbdec5a891751067"
+            ]
+        ]
+    },
+    {
+        "id": "fbdec5a891751067",
+        "type": "exec",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "command": "rm -f ",
+        "addpay": "payload",
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": false,
+        "oldrc": false,
+        "name": "",
+        "x": 390,
+        "y": 460,
+        "wires": [
+            [],
+            [],
+            [
+                "79e81c7dae71dcc6"
+            ]
+        ]
+    },
+    {
+        "id": "79e81c7dae71dcc6",
+        "type": "function",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "name": "Get Result",
+        "func": "let result = true\nlet output = msg.payload\n\nif (output.code !== 0) {\n    result = false\n}\n\nmsg.payload = {\n    success: result\n}\n\nif (!result) {\n    msg.payload.error = output.message\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 550,
+        "y": 460,
+        "wires": [
+            [
+                "e2d6862394948bf7"
+            ]
+        ]
+    },
+    {
+        "id": "e2d6862394948bf7",
+        "type": "link out",
+        "z": "743c34968311fe61",
+        "g": "cde03bdd1ecb13fc",
+        "name": "",
+        "mode": "return",
+        "links": [],
+        "x": 675,
+        "y": 460,
+        "wires": []
+    }
+]
