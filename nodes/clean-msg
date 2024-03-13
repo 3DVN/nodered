@@ -1,0 +1,65 @@
+[
+    {
+        "id": "768d49cee95a9222",
+        "type": "subflow",
+        "name": "Clean MSG",
+        "info": "",
+        "category": "parser",
+        "in": [
+            {
+                "x": 60,
+                "y": 80,
+                "wires": [
+                    {
+                        "id": "10831f02b4d0f82a"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 340,
+                "y": 80,
+                "wires": [
+                    {
+                        "id": "10831f02b4d0f82a",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {},
+        "color": "#DEBD5C",
+        "icon": "node-red/parser-json.svg"
+    },
+    {
+        "id": "10831f02b4d0f82a",
+        "type": "function",
+        "z": "768d49cee95a9222",
+        "name": "Return OMSG",
+        "func": "var msg2 = msg.omsg\nmsg2.payload = msg.payload\nreturn msg2;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 200,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "51453206d0e5e922",
+        "type": "subflow:768d49cee95a9222",
+        "z": "d7b056a6841f8a35",
+        "name": "",
+        "x": 410,
+        "y": 480,
+        "wires": [
+            []
+        ]
+    }
+]
