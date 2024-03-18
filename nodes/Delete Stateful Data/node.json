@@ -1,0 +1,270 @@
+[
+    {
+        "id": "7aba81be09bac241",
+        "type": "subflow",
+        "name": "Delete Stateful File",
+        "info": "Deletes a stateful file\n\nExmaple input payload: {\n    enabled: true,\n    \".info\": {\n        path: \"/path/to/file\"\n    }\n} || \"/path/to/file\" || {\n    path: \"/path/to/file\"\n}",
+        "category": "Stateful Data",
+        "in": [
+            {
+                "x": 80,
+                "y": 120,
+                "wires": [
+                    {
+                        "id": "ae01a8419b043e4d"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 1280,
+                "y": 140,
+                "wires": [
+                    {
+                        "id": "0534e0a82d087eba",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {
+            "module": "Delete Stateful Data",
+            "type": "068BDA39-3C98-486A-B496-F9DFA1F99AD2",
+            "version": "1.0.1",
+            "author": "Devin Hamilton <devin@hamilton321.com>",
+            "desc": "Deletes a stateful file",
+            "keywords": "delete stateful file json",
+            "license": "Apache-2.0"
+        },
+        "color": "#DAC4B4",
+        "icon": "node-red/file-out.svg"
+    },
+    {
+        "id": "ac5416a7600c48f4",
+        "type": "switch",
+        "z": "7aba81be09bac241",
+        "name": "Type?",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "istype",
+                "v": "string",
+                "vt": "string"
+            },
+            {
+                "t": "istype",
+                "v": "object",
+                "vt": "object"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 3,
+        "x": 330,
+        "y": 120,
+        "wires": [
+            [
+                "48fa8da8e8cbd6fa"
+            ],
+            [
+                "a785dad2dc8dcafc"
+            ],
+            [
+                "0534e0a82d087eba"
+            ]
+        ]
+    },
+    {
+        "id": "1c19892a0c17d389",
+        "type": "change",
+        "z": "7aba81be09bac241",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload[\".info\"].path",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 640,
+        "y": 120,
+        "wires": [
+            [
+                "48fa8da8e8cbd6fa"
+            ]
+        ]
+    },
+    {
+        "id": "ae01a8419b043e4d",
+        "type": "function",
+        "z": "7aba81be09bac241",
+        "name": "Prep",
+        "func": "var msg2 = {\n    omsg: msg,\n    payload: msg.payload\n}\nreturn msg2;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 190,
+        "y": 120,
+        "wires": [
+            [
+                "ac5416a7600c48f4"
+            ]
+        ]
+    },
+    {
+        "id": "a785dad2dc8dcafc",
+        "type": "switch",
+        "z": "7aba81be09bac241",
+        "name": "Info?",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "hask",
+                "v": ".info",
+                "vt": "str"
+            },
+            {
+                "t": "hask",
+                "v": "path",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 3,
+        "x": 470,
+        "y": 140,
+        "wires": [
+            [
+                "1c19892a0c17d389"
+            ],
+            [
+                "20bbcd3d8fd538b5"
+            ],
+            [
+                "0534e0a82d087eba"
+            ]
+        ]
+    },
+    {
+        "id": "20bbcd3d8fd538b5",
+        "type": "change",
+        "z": "7aba81be09bac241",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.path",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 640,
+        "y": 160,
+        "wires": [
+            [
+                "48fa8da8e8cbd6fa"
+            ]
+        ]
+    },
+    {
+        "id": "48fa8da8e8cbd6fa",
+        "type": "exec",
+        "z": "7aba81be09bac241",
+        "command": "rm -f ",
+        "addpay": "payload",
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": false,
+        "oldrc": false,
+        "name": "",
+        "x": 830,
+        "y": 140,
+        "wires": [
+            [],
+            [],
+            [
+                "f619ed66c075104d"
+            ]
+        ]
+    },
+    {
+        "id": "0534e0a82d087eba",
+        "type": "function",
+        "z": "7aba81be09bac241",
+        "name": "Clean up",
+        "func": "var msg2 = msg.omsg\nmsg2.payload = msg.payload || {}\nreturn msg2;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1160,
+        "y": 140,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f619ed66c075104d",
+        "type": "function",
+        "z": "7aba81be09bac241",
+        "name": "Get Result",
+        "func": "let result = true\nlet output = msg.payload\n\nif (output.code !== 0) {\n    result = false\n}\n\nmsg.payload = {\n    success: result\n}\n\nif (!result) {\n    msg.payload.error = output.message\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 990,
+        "y": 160,
+        "wires": [
+            [
+                "0534e0a82d087eba"
+            ]
+        ]
+    },
+    {
+        "id": "ec40e16cf3aec3d8",
+        "type": "subflow:7aba81be09bac241",
+        "z": "743c34968311fe61",
+        "g": "559de149caede8b8",
+        "name": "",
+        "x": 570,
+        "y": 1780,
+        "wires": [
+            [
+                "144d06f6e99acf83"
+            ]
+        ]
+    }
+]
