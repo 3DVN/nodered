@@ -1,0 +1,130 @@
+[
+    {
+        "id": "10e49c4295819e7b",
+        "type": "subflow",
+        "name": "New Stateful File",
+        "info": "Create a new file for input object\n\nExmaple input payload: {\n    path: \"/path/to/file\",\n    data: {\n        enabled: true,\n        value: \"example\"\n    }\n}",
+        "category": "Stateful Data",
+        "in": [
+            {
+                "x": 60,
+                "y": 60,
+                "wires": [
+                    {
+                        "id": "e0c40311a7135107"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 760,
+                "y": 60,
+                "wires": [
+                    {
+                        "id": "870b3d70187d4f7f",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {
+            "module": "New File",
+            "type": "AB605A75-07E9-4D9B-9223-CDFC8FAA78AF",
+            "version": "1.0.1",
+            "author": "Devin Hamilton <devin@hamilton321.com>",
+            "desc": "Create a new file for input object",
+            "license": "Apache-2.0"
+        },
+        "color": "#DAC4B4",
+        "icon": "font-awesome/fa-save"
+    },
+    {
+        "id": "e0c40311a7135107",
+        "type": "function",
+        "z": "10e49c4295819e7b",
+        "name": "New File",
+        "func": "var output = msg.payload.data\n\noutput[\".info\"] = {\n    path: msg.payload.path,\n    dateCreated: (new Date().toISOString())\n}\n\nvar msg2 = {\n    omsg: msg,\n    payload: output,\n    filepath: msg.payload.path\n}\n\nmsg2.omsg.payload = output\nreturn msg2;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 180,
+        "y": 60,
+        "wires": [
+            [
+                "12089e3bd742e577"
+            ]
+        ]
+    },
+    {
+        "id": "460bbe05482f2ecf",
+        "type": "file",
+        "z": "10e49c4295819e7b",
+        "name": "",
+        "filename": "filepath",
+        "filenameType": "msg",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 480,
+        "y": 60,
+        "wires": [
+            [
+                "870b3d70187d4f7f"
+            ]
+        ]
+    },
+    {
+        "id": "12089e3bd742e577",
+        "type": "json",
+        "z": "10e49c4295819e7b",
+        "name": "",
+        "property": "payload",
+        "action": "str",
+        "pretty": false,
+        "x": 330,
+        "y": 60,
+        "wires": [
+            [
+                "460bbe05482f2ecf"
+            ]
+        ]
+    },
+    {
+        "id": "870b3d70187d4f7f",
+        "type": "function",
+        "z": "10e49c4295819e7b",
+        "name": "Clean up",
+        "func": "return msg.omsg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 640,
+        "y": 60,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "e20ceea0f020d11b",
+        "type": "subflow:10e49c4295819e7b",
+        "z": "743c34968311fe61",
+        "g": "559de149caede8b8",
+        "name": "",
+        "x": 570,
+        "y": 1660,
+        "wires": [
+            [
+                "0b96954c21a97390"
+            ]
+        ]
+    }
+]
