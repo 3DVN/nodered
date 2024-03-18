@@ -1,0 +1,118 @@
+[
+    {
+        "id": "8f564b0142492123",
+        "type": "subflow",
+        "name": "List Child Items",
+        "info": "Perform an LS to retrieve a list of items in a director\n\ninput payload example: {\n    \"/path/to/item\" || {\n        path: \"/path/to/item\"\n    }\n}",
+        "category": "Stateful Data",
+        "in": [
+            {
+                "x": 60,
+                "y": 40,
+                "wires": [
+                    {
+                        "id": "8c3d58f4fa048706"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 640,
+                "y": 40,
+                "wires": [
+                    {
+                        "id": "f3e9fd6c163c0768",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {
+            "module": "List Files",
+            "type": "DCDFD168-537D-4516-8495-BB4C7F18DCF9",
+            "version": "1.0.1",
+            "author": "Devin Hamilton <devin@hamilton321.com>",
+            "desc": "Perform an LS to retrieve a list of items in a director",
+            "keywords": "list dir ls child items path",
+            "license": "Apache-2.0"
+        },
+        "color": "#DAC4B4",
+        "icon": "font-awesome/fa-list-ul"
+    },
+    {
+        "id": "7df820c7321c55da",
+        "type": "exec",
+        "z": "8f564b0142492123",
+        "command": "ls ",
+        "addpay": "payload",
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": false,
+        "oldrc": false,
+        "name": "",
+        "x": 330,
+        "y": 40,
+        "wires": [
+            [
+                "f3e9fd6c163c0768"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "f3e9fd6c163c0768",
+        "type": "function",
+        "z": "8f564b0142492123",
+        "name": "Build Response",
+        "func": "var files = msg.payload\nvar output = []\n\nif (files !== \"\") {\n    files = files.replace(/\\n$/, \"\").split(\"\\n\")\n    files.forEach(file => {\n        output.push({\n            //name: file.replace(/\\.json/g, \"\"),\n            //file: file,\n            name: file,\n            path: (msg.path.split(\" | \")[0] + \"/\" + file)\n        })\n    })\n}\n\nmsg2 = msg.omsg\nmsg2.payload = output\n\nreturn msg2;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 40,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8c3d58f4fa048706",
+        "type": "function",
+        "z": "8f564b0142492123",
+        "name": "Set Path",
+        "func": "if (typeof(msg.payload) === \"string\") {\n    msg.payload = {\n        path: msg.payload\n    }\n}\nelse if (msg.payload.filter) {\n    msg.payload.path += \" | grep '\" + msg.payload.filter + \"'\"\n    delete msg.payload.filter\n}\n\nvar msg2 = {\n    path: msg.payload.path,\n    payload: msg.payload.path,\n    //format: msg.payload.format || \"object\",\n    omsg: msg\n}\nreturn msg2;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 180,
+        "y": 40,
+        "wires": [
+            [
+                "7df820c7321c55da"
+            ]
+        ]
+    },
+    {
+        "id": "79c2aabe910fa21b",
+        "type": "subflow:8f564b0142492123",
+        "z": "743c34968311fe61",
+        "g": "559de149caede8b8",
+        "name": "",
+        "x": 560,
+        "y": 1620,
+        "wires": [
+            [
+                "305ca30154a0b3be"
+            ]
+        ]
+    }
+]
