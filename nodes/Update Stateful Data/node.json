@@ -1,0 +1,477 @@
+[
+    {
+        "id": "cf509ca6a345a24b",
+        "type": "subflow",
+        "name": "Read Stateful File",
+        "info": "This subflow can be used to read stateful data, which includes metadata used for updating\n\nExample input payload: \"/path/to/file\" || {\n    path: \"/path/to/file\"\n}",
+        "category": "Stateful Data",
+        "in": [
+            {
+                "x": 60,
+                "y": 140,
+                "wires": [
+                    {
+                        "id": "7ff7723e71af9d30"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 1240,
+                "y": 160,
+                "wires": [
+                    {
+                        "id": "1c38e5db95d9b26b",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {
+            "module": "Read File",
+            "type": "9D7BE839-434B-4F81-A7B9-BC6D2F4CC39B",
+            "version": "1.0.1",
+            "author": "Devin Hamilton <devin@hamilton321.com>",
+            "desc": "Read a stateful file",
+            "keywords": "read file json stateful data",
+            "license": "Apache-2.0"
+        },
+        "color": "#DAC4B4",
+        "icon": "font-awesome/fa-file-text-o"
+    },
+    {
+        "id": "7420784ff0d454e6",
+        "type": "file in",
+        "z": "cf509ca6a345a24b",
+        "name": "",
+        "filename": "filepath",
+        "filenameType": "msg",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 820,
+        "y": 160,
+        "wires": [
+            [
+                "774b796636d81b9d"
+            ]
+        ]
+    },
+    {
+        "id": "1944d532ef12e611",
+        "type": "catch",
+        "z": "cf509ca6a345a24b",
+        "name": "",
+        "scope": [
+            "7420784ff0d454e6",
+            "eb3cc21582d7395b"
+        ],
+        "uncaught": false,
+        "x": 490,
+        "y": 220,
+        "wires": [
+            [
+                "b9235f99515d17a4"
+            ]
+        ]
+    },
+    {
+        "id": "b9235f99515d17a4",
+        "type": "function",
+        "z": "cf509ca6a345a24b",
+        "name": "New File",
+        "func": "//var name = msg.omsg.payload.replace(/\\.json$/, \"\")\n\nmsg.payload = {\n    \".info\": {\n        //name: name,\n        path: msg.filepath,\n        dateCreated: (new Date().toISOString())\n    }\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 640,
+        "y": 220,
+        "wires": [
+            [
+                "1c38e5db95d9b26b"
+            ]
+        ]
+    },
+    {
+        "id": "1c38e5db95d9b26b",
+        "type": "function",
+        "z": "cf509ca6a345a24b",
+        "name": "Clean up",
+        "func": "var msg2 = msg.omsg\nmsg2.payload = msg.payload\nreturn msg2;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1120,
+        "y": 160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "774b796636d81b9d",
+        "type": "json",
+        "z": "cf509ca6a345a24b",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 970,
+        "y": 160,
+        "wires": [
+            [
+                "1c38e5db95d9b26b"
+            ]
+        ]
+    },
+    {
+        "id": "479089092495e0c9",
+        "type": "switch",
+        "z": "cf509ca6a345a24b",
+        "name": "Type?",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "istype",
+                "v": "string",
+                "vt": "string"
+            },
+            {
+                "t": "istype",
+                "v": "object",
+                "vt": "object"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 310,
+        "y": 140,
+        "wires": [
+            [
+                "5d8aa16462bb07e1"
+            ],
+            [
+                "fdb26bb36906c1ce"
+            ],
+            [
+                "1c38e5db95d9b26b"
+            ]
+        ]
+    },
+    {
+        "id": "5d8aa16462bb07e1",
+        "type": "change",
+        "z": "cf509ca6a345a24b",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "filepath",
+                "pt": "msg",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 480,
+        "y": 100,
+        "wires": [
+            [
+                "7420784ff0d454e6"
+            ]
+        ]
+    },
+    {
+        "id": "eb3cc21582d7395b",
+        "type": "change",
+        "z": "cf509ca6a345a24b",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "filepath",
+                "pt": "msg",
+                "to": "payload[\".info\"].path",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 620,
+        "y": 140,
+        "wires": [
+            [
+                "7420784ff0d454e6"
+            ]
+        ]
+    },
+    {
+        "id": "7ff7723e71af9d30",
+        "type": "function",
+        "z": "cf509ca6a345a24b",
+        "name": "Prep",
+        "func": "var msg2 = {\n    omsg: msg,\n    payload: msg.payload\n}\nreturn msg2;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 170,
+        "y": 140,
+        "wires": [
+            [
+                "479089092495e0c9"
+            ]
+        ]
+    },
+    {
+        "id": "fdb26bb36906c1ce",
+        "type": "switch",
+        "z": "cf509ca6a345a24b",
+        "name": "Info?",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "hask",
+                "v": ".info",
+                "vt": "str"
+            },
+            {
+                "t": "hask",
+                "v": "path",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 450,
+        "y": 160,
+        "wires": [
+            [
+                "eb3cc21582d7395b"
+            ],
+            [
+                "d95100245a252ca8"
+            ],
+            [
+                "1c38e5db95d9b26b"
+            ]
+        ]
+    },
+    {
+        "id": "d95100245a252ca8",
+        "type": "change",
+        "z": "cf509ca6a345a24b",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "filepath",
+                "pt": "msg",
+                "to": "payload.path",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 620,
+        "y": 180,
+        "wires": [
+            [
+                "7420784ff0d454e6"
+            ]
+        ]
+    },
+    {
+        "id": "5b35b0fc5a63d55f",
+        "type": "subflow",
+        "name": "Update Stateful File",
+        "info": "Updates a stateful file's contents with whatever object is provided.\n\nNote: Any changes made to the \".info\" child object will be ignored, as this is re-read from the file before saving. This object is meant to be informational only.",
+        "category": "Stateful Data",
+        "in": [
+            {
+                "x": 80,
+                "y": 100,
+                "wires": [
+                    {
+                        "id": "8e0ba330a443978b"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 1180,
+                "y": 100,
+                "wires": [
+                    {
+                        "id": "557512460397f242",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {
+            "module": "Update Stateful File",
+            "type": "3DDF9C62-6BB0-40F2-B951-38C17346C96A",
+            "version": "10.1",
+            "author": "Devin Hamilton <devin@hamilton321.com>",
+            "desc": "Updates a stateful file's contents",
+            "keywords": "update stateful file json write",
+            "license": "Apache-2.0"
+        },
+        "color": "#DAC4B4",
+        "icon": "font-awesome/fa-refresh"
+    },
+    {
+        "id": "8024acd558844a4a",
+        "type": "function",
+        "z": "5b35b0fc5a63d55f",
+        "name": "Update Job File",
+        "func": "var input = msg.payload\nvar update = msg.omsg.payload\n\nObject.keys(update).forEach(a => {\n    if (a !== \".info\" ) {\n        input[a] = update[a]\n    }\n})\n\ninput[\".info\"].dateUpdated = (new Date().toISOString())\n\nmsg.payload = input\nmsg.omsg.payload = input\nmsg.filepath = input[\".info\"].path\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 580,
+        "y": 100,
+        "wires": [
+            [
+                "b0f9b449f8e6d621"
+            ]
+        ]
+    },
+    {
+        "id": "557512460397f242",
+        "type": "function",
+        "z": "5b35b0fc5a63d55f",
+        "name": "Clean up",
+        "func": "return msg.omsg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1060,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "582c51d80a96b94c",
+        "type": "subflow:cf509ca6a345a24b",
+        "z": "5b35b0fc5a63d55f",
+        "name": "",
+        "x": 370,
+        "y": 100,
+        "wires": [
+            [
+                "8024acd558844a4a"
+            ]
+        ]
+    },
+    {
+        "id": "b0f9b449f8e6d621",
+        "type": "json",
+        "z": "5b35b0fc5a63d55f",
+        "name": "",
+        "property": "payload",
+        "action": "str",
+        "pretty": false,
+        "x": 750,
+        "y": 100,
+        "wires": [
+            [
+                "5053fcc0e76f6985"
+            ]
+        ]
+    },
+    {
+        "id": "5053fcc0e76f6985",
+        "type": "file",
+        "z": "5b35b0fc5a63d55f",
+        "name": "",
+        "filename": "filepath",
+        "filenameType": "msg",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 900,
+        "y": 100,
+        "wires": [
+            [
+                "557512460397f242"
+            ]
+        ]
+    },
+    {
+        "id": "8e0ba330a443978b",
+        "type": "function",
+        "z": "5b35b0fc5a63d55f",
+        "name": "Prep",
+        "func": "var msg2 = {\n    omsg: msg,\n    payload: msg.payload\n}\nreturn msg2;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 190,
+        "y": 100,
+        "wires": [
+            [
+                "582c51d80a96b94c"
+            ]
+        ]
+    },
+    {
+        "id": "3ea37f521ad8e542",
+        "type": "subflow:5b35b0fc5a63d55f",
+        "z": "743c34968311fe61",
+        "g": "559de149caede8b8",
+        "name": "",
+        "x": 600,
+        "y": 1740,
+        "wires": [
+            [
+                "4087e8074948c466"
+            ]
+        ]
+    }
+]
