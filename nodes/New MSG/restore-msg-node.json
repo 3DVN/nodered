@@ -1,0 +1,73 @@
+[
+    {
+        "id": "768d49cee95a9222",
+        "type": "subflow",
+        "name": "Restore MSG",
+        "info": "Restore MSG is used to restore previously backed up msg components by New MSG node.\n\n## Update Info\n### 1.3.2\n - Stopped referring to msg.omsg directly during the restore process, as the restore of msg.omsg would overwrite the reference point, and no further keys could be restored. Now, this is saved to a variable, which is used in the restore process.",
+        "category": "parser",
+        "in": [
+            {
+                "x": 60,
+                "y": 80,
+                "wires": [
+                    {
+                        "id": "10831f02b4d0f82a"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 340,
+                "y": 80,
+                "wires": [
+                    {
+                        "id": "10831f02b4d0f82a",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {
+            "module": "Clean MSG",
+            "type": "F3A8FE42-9831-41A4-9DDF-F189C4FB325E",
+            "version": "1.3.2",
+            "author": "Devin Hamilton <devin@hamilton321.com>",
+            "desc": "Restores msg keys",
+            "keywords": "clean msg omsg restore",
+            "license": "Apache-2.0"
+        },
+        "color": "#DEBD5C",
+        "icon": "node-red/parser-json.svg"
+    },
+    {
+        "id": "10831f02b4d0f82a",
+        "type": "function",
+        "z": "768d49cee95a9222",
+        "name": "Return OMSG",
+        "func": "var restore = msg.omsg\ndelete msg.omsg;\n\nObject.keys(restore).forEach(a => {\n    if (a !== 'payload') {\n        msg[a] = restore[a]\n    }\n    delete restore[a]\n})\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 200,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d4d125440815eb63",
+        "type": "subflow:768d49cee95a9222",
+        "z": "ac90e9c6ca927791",
+        "name": "",
+        "x": 1080,
+        "y": 540,
+        "wires": [
+            []
+        ]
+    }
+]
