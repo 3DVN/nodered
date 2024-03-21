@@ -1,0 +1,73 @@
+[
+    {
+        "id": "5dd2f21a034d4142",
+        "type": "subflow",
+        "name": "New MSG",
+        "info": "This can be used to create a new 'child' msg, to have a  temporary clean slate msg object in a flow.\n\nA new msg object is created, with the original msg object being stored at 'msg.omsg' which can be later restored. The reason to do this is store variables at the msg level that are useful within a portion of an overall flow, which can later be discarded when no longer necessary, as opposed to trying to delete all of the un-needed keys.\n\nThis is meant to be used with the 'Clean MSG' subflow, which will revert to the original msg, along with the payload of the current flow.\n\nBy default, copies are shallow, to minimize the resources used. However, when certian keys are found on the root-msg, then a deep copy will be created. Deep copies are useful when dealing with input/output nodes, such as HTTP request and responses.\n\nThe intention is that you can reference items in the 'parent' msg by reading the msg.omsg object, but you should not perform any modifications to this object. While you can technically write to this object, it should be considered read-only, and has not been thoroughly tested with write actions. Anything needed outside of this temporary flow should be returned via msg.payload to the \"Clean MSG\" node.\n\n## Updates\n### 1.3.0\n - Resoved a 'depth' issue: Message keys are saved to a variable first, before being written to the msg. Otherwise, creating msg.omsg would erase any previsouly-nested msg.omsg.",
+        "category": "parser",
+        "in": [
+            {
+                "x": 100,
+                "y": 100,
+                "wires": [
+                    {
+                        "id": "bf54fb0e43a80154"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 360,
+                "y": 100,
+                "wires": [
+                    {
+                        "id": "bf54fb0e43a80154",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {
+            "module": "Prep MSG",
+            "type": "7B4BF8A7-9E1F-460D-8762-C3B790725E7F",
+            "version": "1.3.0",
+            "author": "Devin Hamilton <devin@hamilton321.com>",
+            "desc": "Creates a new message for temporary flow",
+            "keywords": "prep msg temporary new message",
+            "license": "Apache-2.0"
+        },
+        "color": "#DEBD5C",
+        "icon": "node-red/parser-json.svg"
+    },
+    {
+        "id": "bf54fb0e43a80154",
+        "type": "function",
+        "z": "5dd2f21a034d4142",
+        "name": "Clone MSG",
+        "func": "var protectedKeys = [\n    \"req\",\n    \"res\",\n    \"topic\",\n    \"_msgid\"\n]\n\nvar backup = {}\nObject.keys(msg).forEach(a => {\n    if (!protectedKeys.includes(a)) {\n        backup[a] = msg[a];\n        if (a !== \"payload\") {\n            delete msg[a];\n        }\n    }\n})\nmsg.omsg = backup\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 230,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7fca8f55886bf467",
+        "type": "subflow:5dd2f21a034d4142",
+        "z": "ac90e9c6ca927791",
+        "name": "",
+        "x": 710,
+        "y": 540,
+        "wires": [
+            []
+        ]
+    }
+]
