@@ -1,0 +1,2318 @@
+[
+    {
+        "id": "bb2022c0266d2fc5",
+        "type": "group",
+        "z": "5052831abf174a2e",
+        "name": "Standard Components",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "c9770bf7886625a1",
+            "7577ab7720c72a21",
+            "9bb4dbad4148188c",
+            "f995512af6914478",
+            "abc3daee91098854",
+            "35b8f06cf08388bf",
+            "cb9868a3e202d6da",
+            "4f7f0ee6fb62d672",
+            "84afa2e9713b720d",
+            "588466b11a2c2ab5",
+            "f49a450b51d2c0b9"
+        ],
+        "x": 74,
+        "y": 79,
+        "w": 1712,
+        "h": 122
+    },
+    {
+        "id": "768d49cee95a9222",
+        "type": "subflow",
+        "name": "Restore MSG",
+        "info": "Restore MSG is used to restore previously backed up msg components by New MSG node.\n\n## Update Info\n### 1.3.2\n - Stopped referring to msg.omsg directly during the restore process, as the restore of msg.omsg would overwrite the reference point, and no further keys could be restored. Now, this is saved to a variable, which is used in the restore process.",
+        "category": "parser",
+        "in": [
+            {
+                "x": 60,
+                "y": 80,
+                "wires": [
+                    {
+                        "id": "10831f02b4d0f82a"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 340,
+                "y": 80,
+                "wires": [
+                    {
+                        "id": "10831f02b4d0f82a",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {
+            "module": "Clean MSG",
+            "type": "F3A8FE42-9831-41A4-9DDF-F189C4FB325E",
+            "version": "1.3.2",
+            "author": "Devin Hamilton <devin@hamilton321.com>",
+            "desc": "Restores msg keys",
+            "keywords": "clean msg omsg restore",
+            "license": "Apache-2.0"
+        },
+        "color": "#DEBD5C",
+        "icon": "node-red/parser-json.svg"
+    },
+    {
+        "id": "10831f02b4d0f82a",
+        "type": "function",
+        "z": "768d49cee95a9222",
+        "name": "Return OMSG",
+        "func": "var protectedKeys = [\n    \"req\",\n    \"res\",\n    \"topic\",\n    \"_msgid\",\n    \"payload\"\n]\n\nvar restore = msg.omsg\ndelete msg.omsg;\n\nObject.keys(msg).forEach(a => {\n    if (!protectedKeys.includes(a)) {\n        delete msg[a];\n    }\n})\n\nObject.keys(restore).forEach(a => {\n    if (a !== 'payload') {\n        msg[a] = restore[a]\n    }\n    delete restore[a]\n})\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 200,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5dd2f21a034d4142",
+        "type": "subflow",
+        "name": "New MSG",
+        "info": "This can be used to create a new 'child' msg, to have a  temporary clean slate msg object in a flow.\n\nA new msg object is created, with the original msg object being stored at 'msg.omsg' which can be later restored. The reason to do this is store variables at the msg level that are useful within a portion of an overall flow, which can later be discarded when no longer necessary, as opposed to trying to delete all of the un-needed keys.\n\nThis is meant to be used with the 'Clean MSG' subflow, which will revert to the original msg, along with the payload of the current flow.\n\nBy default, copies are shallow, to minimize the resources used. However, when certian keys are found on the root-msg, then a deep copy will be created. Deep copies are useful when dealing with input/output nodes, such as HTTP request and responses.\n\nThe intention is that you can reference items in the 'parent' msg by reading the msg.omsg object, but you should not perform any modifications to this object. While you can technically write to this object, it should be considered read-only, and has not been thoroughly tested with write actions. Anything needed outside of this temporary flow should be returned via msg.payload to the \"Clean MSG\" node.\n\n## Updates\n### 1.3.0\n - Resoved a 'depth' issue: Message keys are saved to a variable first, before being written to the msg. Otherwise, creating msg.omsg would erase any previsouly-nested msg.omsg.",
+        "category": "parser",
+        "in": [
+            {
+                "x": 100,
+                "y": 100,
+                "wires": [
+                    {
+                        "id": "bf54fb0e43a80154"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 360,
+                "y": 100,
+                "wires": [
+                    {
+                        "id": "bf54fb0e43a80154",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {
+            "module": "Prep MSG",
+            "type": "7B4BF8A7-9E1F-460D-8762-C3B790725E7F",
+            "version": "1.3.0",
+            "author": "Devin Hamilton <devin@hamilton321.com>",
+            "desc": "Creates a new message for temporary flow",
+            "keywords": "prep msg temporary new message",
+            "license": "Apache-2.0"
+        },
+        "color": "#DEBD5C",
+        "icon": "node-red/parser-json.svg"
+    },
+    {
+        "id": "bf54fb0e43a80154",
+        "type": "function",
+        "z": "5dd2f21a034d4142",
+        "name": "Clone MSG",
+        "func": "var protectedKeys = [\n    \"req\",\n    \"res\",\n    \"topic\",\n    \"_msgid\"\n]\n\nvar backup = {}\nObject.keys(msg).forEach(a => {\n    if (!protectedKeys.includes(a)) {\n        backup[a] = msg[a];\n        if (a !== \"payload\") {\n            delete msg[a];\n        }\n    }\n})\nmsg.omsg = backup\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 230,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "bda95e6aeb04a072",
+        "type": "subflow",
+        "name": "Make Mimecast API 2.0 Call",
+        "info": "Interact with Mimecast using API 2.0!\n\n# About This Subflow\nThis subflow is meant to be used when trying to interact with Mimecast using their API 2.0 gateway and endpoints. It does attempt to make using their API easier and more repetitive within Node Red, but has not been exhaustively tested.\nThis also does not go through all Mimeast's API 2.0 options or concepts. It's advised to become familar with [Mimecast's API 2.0](https://developer.services.mimecast.com/api-overview) to make the most out of this subflow.\n\nThis is a true subflow and not a node to be installed via the palette. The reason for making available in this way is because often an installable node doesn't 100% match the use cases needed by those using it. By providing it as a subflow, it is meant to make it easier for you to understand how it works, customize the subflow to meet your needs, and enable you to tinker with it as desired.\n\n## Not an Official Integration\nIt is critical to note that this subflow is not an official Mimecast release, and **is not supported by Mimecast**. Please **do not open a support case with Mimecast** for any issues encountered when using this subflow. It is provided as-is with no commitment to support by anyone.\n\n## Features\nThis subflow does attempt to work with the following concepts:\n - **OAuth 2.0**: Use of OAuth 2.0 involves using a provided \\(by Mimecast via the Administration Console\\) Client ID and Client Secret to get an access token, which is then used to authenticate each API call being made. When the token expires, a new token is requested. This subflow uses the Client ID and Client Secret properties to obtain a token, which is then stored within a sub-node's context for continued use. When a token has expired, a new token is automaticaly requested.\n - **Pagination**: Pagination is making subsequent API calls to get large amounts of data where all the requested information cannot be returned in a single API call. Depending on the endpoint, Mimecast's API has a couple of concepts to deal with pagination \\(`pagination` object under the response body `meta` object, and `nextPage` at the reeponse body root\\), which this subflow attempts to use to gather all results before returning the data to the subflow output. This hasn't been exhaustively tested, but has been known to work with a number of calls.\n - **Rate Limiting**: When a `429` response status code is received from Mimecast, a response header provides the amount of time needed before they will service additional API calls. This value is used to wait for the necessary amount of time, and retry the API call.\n - **Debug**: Debug nodes are present within this subflow, which will output a fully built `msg` that will be sent to the HTTP request sub-node, and a fully built `msg` that is returned by the HTTP request node. This are shown in the debug panel. When outputting the request, the authoriztion header will be shortened to prevent exposing the full access token.\n\n## Considerations\nThese are some things that should be taken into account when using this subflow.\n\n### Minimize the number of instances of this subflow\n Be cautious of the number of this subflow you deploy. When using subflows, each instance of the subflow that is deployed essentially adds all subflow nodes to your deployment. If this subflow has 5 nodes within it \\(which it actually has many more\\), and you deploy two instances of this subflow, then you are adding 10 new nodes to your deployment. This can lead to memory bloat and you should consider fewer subflow deployments and use something like link-nodes to send API requests to the subflow when interacting with a single Mimecast account.\n\n### Be careful about sending too many requests at once\n The Node Red native HTTP request node is used to make API calls, which has been observed in the past to return responses to the wrong `msg` that was sent to it. If you expect to be making hundreds of API calls at once, you may need to to consider adding logic to queue the requests sent to this subflow.\n\n# Usage\nThis explains how you should expect to be able to use this subflow.\n\n## Subflow Properties\nThe following configuration options are available for the subflow as a whole:\n - **Client ID**: This is the API Client ID provided by Mimecast when creating an API application. This value can be set at the subflow level or reference an environment variable (which should store this value securely).\n - **Client Secret**: This is the API Client Secret provided by Mimecast when creating an API application. This value can be set at the subflow level or reference an environment variable (which should store this value securely).\n - **Base URL**: This allows you to customize the base URL from the global URl to a regional URL. For more information, see the [Mimecast API Overview](https://developer.services.mimecast.com/api-overview#api-gateway-options). This value can be set at the subflow level or reference an environment variable.\n - **Token URI**: This is the URI used when obtaining an API 2.0 Access Token. Unless doing some testing with Mimecast, this shouldn`t be changed. This value can be set at the subflow level or reference an environment variable.\n - **Default Page Size**: When making an API call to retrieve data, the page size option will tell Mimecast how many results to return in each API call. Some notes about page size:\n     - This reduces the number of API calls that may need to be made when retrieving large amounts of data, but can also cause the Mimecast's API to take longer to package and return the data.\n     - Generally, it's better to request more data in each API call raather than less data over more API calls, as this reduces the chance of being rate limited. The maximum page size varies by API endpoint (URI).\n     - The default is 500 to align with most of the API calls' maximum value.\n     - If specifying a value larger than the endpoint will allow, Mimecast will return the maximum number allowed by that input, so it is safe to configure a higher number.\n     - This value can be set at the subflow level or reference an environment variable.\n - **Debug**: This will output the full `msg` object before making an API call and immediately following a response from the API for all API calls sent to the subflow. There is also an option to set this within the `msg.payload` to troubleshoot specific API calls in cases where many calls are going through the subflow. This value can be set at the subflow level or reference an environment variable.\n\n## Payload Properties\n### Required\nThis subflow requires the following fields in the msg.payload object in order to properly make an API call:\n - **uri**: The Uniform Resource Identifier that will be used when calling Mimecast's API. This is also known as the path, and an example would be `/api/account/get-account`.\n\n### Optional\nThe subflow has these optional additional fields for more advanced API calls:\n - **method**: This is the API verb method used when making an API call. Examples are `GET`, `POST`, `PUT`, `PATCH`, and `DELETE`. To be compatible with the bulk of Mimeast's API calls, the default method is `POST` when no method is provided.\n - **data**: This is the API request body data field or parameters. Some notes:\n   - Mimecast's common API request body expects the data field to be an array, but this subflow can also convert a data object into an array of a single object. You can, but do not need to, send the data field as an array.\n   - Depending on the method, this will either be provided to Mimecast's API as parameters \\(when using the `GET` method\\) or the request body \\(e.g., when using the `POST` method\\).\n - **meta**: This is the meta object in common API request bodies that can be used to specify pagnination and page sizing options.\n - **debug**: This is a boolean that will output each request and response msg's to the debug window for use when troubleshooting an unexpected outcome. This can also be set at the node level for all API calls being processed.\n\n## Payload Examples\nHere are some example payloads that are expected to work with this subflow.\n\n### Basic request data from API:\n```\nmsg.payload = {\n    uri: '/api/account/get-account'\n};\n```\n\n### More complete request to get specific info or request an action:\n```\nmsg.payload = {\n    uri: '/api/ttp/attachment/get-logs',\n    method: 'POST',\n    meta: {\n        pagination: {\n            pageSize: 100\n        }\n    },\n    data: {\n        from: '2025-12-10T00:00:00+0000',\n        to: '2025-12-16T00:00:00+0000',\n        route: 'inbound'\n    }\n};\n```",
+        "category": "",
+        "in": [
+            {
+                "x": 120,
+                "y": 480,
+                "wires": [
+                    {
+                        "id": "4b154388a50296bf"
+                    },
+                    {
+                        "id": "8d7c30a945c47daa"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 3020,
+                "y": 480,
+                "wires": [
+                    {
+                        "id": "e895d42e0c86126c",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [
+            {
+                "name": "authClientId",
+                "type": "cred",
+                "ui": {
+                    "label": {
+                        "en-US": "Client ID"
+                    },
+                    "type": "input",
+                    "opts": {
+                        "types": [
+                            "env",
+                            "cred"
+                        ]
+                    }
+                }
+            },
+            {
+                "name": "authClientSecret",
+                "type": "cred",
+                "ui": {
+                    "label": {
+                        "en-US": "Client Secret"
+                    },
+                    "type": "input",
+                    "opts": {
+                        "types": [
+                            "env",
+                            "cred"
+                        ]
+                    }
+                }
+            },
+            {
+                "name": "baseUrl",
+                "type": "str",
+                "value": "https://api.services.mimecast.com",
+                "ui": {
+                    "label": {
+                        "en-US": "Base URL"
+                    },
+                    "type": "input",
+                    "opts": {
+                        "types": [
+                            "str",
+                            "env"
+                        ]
+                    }
+                }
+            },
+            {
+                "name": "tokenUri",
+                "type": "str",
+                "value": "/oauth/token",
+                "ui": {
+                    "label": {
+                        "en-US": "Token URI"
+                    },
+                    "type": "input",
+                    "opts": {
+                        "types": [
+                            "str",
+                            "env"
+                        ]
+                    }
+                }
+            },
+            {
+                "name": "defaultPageSize",
+                "type": "num",
+                "value": "500",
+                "ui": {
+                    "label": {
+                        "en-US": "Default Page Size"
+                    },
+                    "type": "input",
+                    "opts": {
+                        "types": [
+                            "num",
+                            "env"
+                        ]
+                    }
+                }
+            },
+            {
+                "name": "debugOutput",
+                "type": "bool",
+                "value": "false",
+                "ui": {
+                    "label": {
+                        "en-US": "Debug"
+                    },
+                    "type": "input",
+                    "opts": {
+                        "types": [
+                            "bool",
+                            "env"
+                        ]
+                    }
+                }
+            }
+        ],
+        "meta": {
+            "module": "Mimecast API 2.0",
+            "version": "1.0.0",
+            "author": "Devin Hamilton <devin@hamilton321.com>",
+            "desc": "Interact with Mimecast using API 2.0",
+            "keywords": "Mimecast, email security, human risk",
+            "license": "Apache-2.0"
+        },
+        "color": "#E7E7AE",
+        "icon": "font-awesome/fa-globe",
+        "status": {
+            "x": 2040,
+            "y": 160,
+            "wires": [
+                {
+                    "id": "c659c462d395c336",
+                    "port": 0
+                },
+                {
+                    "id": "2398a75c0ddcc6b3",
+                    "port": 0
+                }
+            ]
+        }
+    },
+    {
+        "id": "5ba9cca36980b1d0",
+        "type": "link in",
+        "z": "bda95e6aeb04a072",
+        "name": "Get API Token",
+        "links": [],
+        "x": 350,
+        "y": 140,
+        "wires": [
+            [
+                "0b557f6502f688ba"
+            ]
+        ],
+        "l": true
+    },
+    {
+        "id": "69b4c689fdf0cee4",
+        "type": "link out",
+        "z": "bda95e6aeb04a072",
+        "name": "link out 65",
+        "mode": "return",
+        "links": [],
+        "x": 925,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "075418b4dff5cc3a",
+        "type": "link in",
+        "z": "bda95e6aeb04a072",
+        "name": "Set API Token",
+        "links": [],
+        "x": 350,
+        "y": 180,
+        "wires": [
+            [
+                "4b8b2ea8d50e03b0"
+            ]
+        ],
+        "l": true
+    },
+    {
+        "id": "0b557f6502f688ba",
+        "type": "change",
+        "z": "bda95e6aeb04a072",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "tokenAction",
+                "pt": "msg",
+                "to": "get",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 560,
+        "y": 140,
+        "wires": [
+            [
+                "1eb0596d1fe256ad"
+            ]
+        ]
+    },
+    {
+        "id": "4b8b2ea8d50e03b0",
+        "type": "change",
+        "z": "bda95e6aeb04a072",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "tokenAction",
+                "pt": "msg",
+                "to": "set",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 560,
+        "y": 180,
+        "wires": [
+            [
+                "1eb0596d1fe256ad"
+            ]
+        ]
+    },
+    {
+        "id": "1eb0596d1fe256ad",
+        "type": "function",
+        "z": "bda95e6aeb04a072",
+        "name": "Token Handler",
+        "func": "let token = context.get('token') ?? {};\nlet action = msg.tokenAction;\nlet output = {};\n\nswitch (action) {\n    case 'get':\n        if (token.expiration !== undefined && new Date(token.expiration) > new Date()) {\n            output = {\n                success: (token.token !== undefined),\n                token: token.token\n            };\n        } else {\n            output = {\n                success: false,\n                error: 'token does not exist or expired'\n            };\n        };\n        break;\n    case 'set':\n        if (msg.payload.token !== undefined && msg.payload.expiration !== undefined) {\n            token = {\n                token: msg.payload.token,\n                expiration: msg.payload.expiration\n            };\n            context.set('token', token);\n            \n            output = token;\n            output.success = true;\n        } else {\n            output = {\n                success: false,\n                error: 'either token or expiration is invalid'\n            };\n        };\n        break;\n    default:\n        output = {\n            success: false,\n            error: 'unsupported action'\n        };\n}\n\nmsg.payload = output;\ndelete msg.tokenAction;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 800,
+        "y": 160,
+        "wires": [
+            [
+                "69b4c689fdf0cee4"
+            ]
+        ]
+    },
+    {
+        "id": "bfbc66999ee85855",
+        "type": "function",
+        "z": "bda95e6aeb04a072",
+        "name": "Set msg fields",
+        "func": "msg.headers = msg.payload.headers ?? {},\nmsg.url = env.get('baseUrl') + msg.payload.uri,\nmsg.data = msg.payload.data ?? {},\nmsg.meta = msg.payload.meta ?? {},\nmsg.method = msg.payload.method ?? \"POST\",\nmsg.debug = msg.payload.debug\n\nif (msg.headers.accept === undefined) {\n    msg.headers.accept = \"application/json\"\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 500,
+        "wires": [
+            [
+                "e42270852f4db1f5"
+            ]
+        ]
+    },
+    {
+        "id": "e42270852f4db1f5",
+        "type": "link call",
+        "z": "bda95e6aeb04a072",
+        "name": "",
+        "links": [
+            "5ba9cca36980b1d0"
+        ],
+        "linkType": "static",
+        "timeout": "30",
+        "x": 640,
+        "y": 520,
+        "wires": [
+            [
+                "b8ca2333be7b65eb"
+            ]
+        ]
+    },
+    {
+        "id": "b8ca2333be7b65eb",
+        "type": "switch",
+        "z": "bda95e6aeb04a072",
+        "name": "Success?",
+        "property": "payload.success",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "true"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 820,
+        "y": 520,
+        "wires": [
+            [
+                "b26f5e7608dde68e"
+            ],
+            [
+                "037cd4ba96d39b71"
+            ]
+        ]
+    },
+    {
+        "id": "b26f5e7608dde68e",
+        "type": "function",
+        "z": "bda95e6aeb04a072",
+        "name": "Add Authorization",
+        "func": "var type = msg.payload.type ?? \"Bearer\"\nmsg.headers.authorization = `${type} ${msg.payload.token}`;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1030,
+        "y": 460,
+        "wires": [
+            [
+                "43ee967456f64b91"
+            ]
+        ]
+    },
+    {
+        "id": "cb1b0d55a331b8af",
+        "type": "function",
+        "z": "bda95e6aeb04a072",
+        "name": "Get New Token",
+        "func": "var fields = [\n    \"client_id=\" + env.get('authClientId'),\n    \"client_secret=\" + env.get('authClientSecret'),\n    \"grant_type=client_credentials\"\n];\n\n\nmsg.url = env.get('baseUrl') + env.get('tokenUri'),\nmsg.payload = fields.join(\"&\")\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1020,
+        "y": 580,
+        "wires": [
+            [
+                "36ac1aede337e101",
+                "01d374cd8c1502b6"
+            ]
+        ]
+    },
+    {
+        "id": "36ac1aede337e101",
+        "type": "http request",
+        "z": "bda95e6aeb04a072",
+        "name": "",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "25f8f84a.4e7f98",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [
+            {
+                "keyType": "other",
+                "keyValue": "Content-Type",
+                "valueType": "other",
+                "valueValue": "application/x-www-form-urlencoded"
+            }
+        ],
+        "x": 1210,
+        "y": 580,
+        "wires": [
+            [
+                "4466554fea6f1547"
+            ]
+        ]
+    },
+    {
+        "id": "4466554fea6f1547",
+        "type": "function",
+        "z": "bda95e6aeb04a072",
+        "name": "Parse Response",
+        "func": "var token = msg.payload\n\nif (! (token.fail && token.fail.length > 0)) {\n    var timestamp = new Date()\n    timestamp.setSeconds(timestamp.getSeconds() + token.expires_in)\n\n    token.expires_timestamp = timestamp\n\n    msg.payload = {\n        token: token.access_token,\n        expiration: timestamp\n    };\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1400,
+        "y": 580,
+        "wires": [
+            [
+                "4c0ab4f3f7541cff"
+            ]
+        ]
+    },
+    {
+        "id": "4c0ab4f3f7541cff",
+        "type": "link call",
+        "z": "bda95e6aeb04a072",
+        "name": "",
+        "links": [
+            "075418b4dff5cc3a"
+        ],
+        "linkType": "static",
+        "timeout": "30",
+        "x": 1600,
+        "y": 580,
+        "wires": [
+            [
+                "4d2f8bd1c5d3066a"
+            ]
+        ]
+    },
+    {
+        "id": "43ee967456f64b91",
+        "type": "switch",
+        "z": "bda95e6aeb04a072",
+        "name": "Method?",
+        "property": "method",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "regex",
+                "v": "get",
+                "vt": "str",
+                "case": true
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1220,
+        "y": 460,
+        "wires": [
+            [
+                "a2af953e17714505"
+            ],
+            [
+                "45540617ef80fec2"
+            ]
+        ]
+    },
+    {
+        "id": "a2af953e17714505",
+        "type": "change",
+        "z": "bda95e6aeb04a072",
+        "name": "",
+        "rules": [
+            {
+                "t": "delete",
+                "p": "method",
+                "pt": "msg"
+            },
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "data",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1400,
+        "y": 440,
+        "wires": [
+            [
+                "5f87da17c3bc895c",
+                "8d2e28c98449579f"
+            ]
+        ]
+    },
+    {
+        "id": "45540617ef80fec2",
+        "type": "function",
+        "z": "bda95e6aeb04a072",
+        "name": "Format Body",
+        "func": "msg.payload = {\n    meta: msg.meta,\n    data: msg.data\n}\n\nif (!Array.isArray(msg.payload.data)) msg.payload.data = [msg.payload.data]\n\nif (Object.keys(msg.payload).length > 0) {\n    if (Object.keys(msg.payload.meta).length === 0) delete msg.payload.meta\n    if (Object.keys(msg.payload.data).length === 0) delete msg.payload.data\n    if (msg.payload.data.length === 1 && Object.keys(msg.payload.data[0]).length === 0) delete msg.payload.data\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1390,
+        "y": 480,
+        "wires": [
+            [
+                "f9be544b5018cd68",
+                "8d2e28c98449579f"
+            ]
+        ]
+    },
+    {
+        "id": "5f87da17c3bc895c",
+        "type": "http request",
+        "z": "bda95e6aeb04a072",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "query",
+        "url": "",
+        "tls": "25f8f84a.4e7f98",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1590,
+        "y": 440,
+        "wires": [
+            [
+                "9bcff887e86d2c31",
+                "4b595ee8fb01ce93"
+            ]
+        ]
+    },
+    {
+        "id": "f9be544b5018cd68",
+        "type": "http request",
+        "z": "bda95e6aeb04a072",
+        "name": "",
+        "method": "use",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "25f8f84a.4e7f98",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1590,
+        "y": 480,
+        "wires": [
+            [
+                "123b32863f5e30b0",
+                "4b595ee8fb01ce93"
+            ]
+        ]
+    },
+    {
+        "id": "9bcff887e86d2c31",
+        "type": "change",
+        "z": "bda95e6aeb04a072",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "method",
+                "pt": "msg",
+                "to": "GET",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1780,
+        "y": 440,
+        "wires": [
+            [
+                "123b32863f5e30b0"
+            ]
+        ]
+    },
+    {
+        "id": "db7cb616354b8ca2",
+        "type": "function",
+        "z": "bda95e6aeb04a072",
+        "name": "Make another API call",
+        "func": "//msg.allResults.push(msg.payload)\n\nvar output = {\n    meta: {\n        pagination: {\n            pageSize: msg.payload.meta.pageSize || env.get(\"defaultPageSize\"),\n            pageToken: msg.payload.meta.pagination.next\n        }\n    },\n    data: msg.data || []\n}\n\nmsg.meta.pagination = {\n    pageSize: msg.payload.meta.pageSize || env.get(\"defaultPageSize\"),\n    pageToken: msg.payload.meta.pagination.next\n}\n\nmsg.headers = {}\n//msg.payload = output\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2560,
+        "y": 400,
+        "wires": [
+            [
+                "34511934337603a8"
+            ]
+        ]
+    },
+    {
+        "id": "d9ad10570f4dec3c",
+        "type": "change",
+        "z": "bda95e6aeb04a072",
+        "name": "Retry",
+        "rules": [
+            {
+                "t": "delete",
+                "p": "delay",
+                "pt": "msg"
+            },
+            {
+                "t": "delete",
+                "p": "statusCode",
+                "pt": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 2490,
+        "y": 500,
+        "wires": [
+            [
+                "c8bb751d669d12c8"
+            ]
+        ]
+    },
+    {
+        "id": "41fbfa77b8e00f02",
+        "type": "switch",
+        "z": "bda95e6aeb04a072",
+        "name": "Paged?",
+        "property": "payload.meta.pagination",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "hask",
+                "v": "next",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 2340,
+        "y": 440,
+        "wires": [
+            [
+                "db7cb616354b8ca2"
+            ],
+            [
+                "4136fedab88c06b2"
+            ]
+        ]
+    },
+    {
+        "id": "1e0789820278e927",
+        "type": "delay",
+        "z": "bda95e6aeb04a072",
+        "name": "",
+        "pauseType": "delayv",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 2340,
+        "y": 500,
+        "wires": [
+            [
+                "d9ad10570f4dec3c"
+            ]
+        ]
+    },
+    {
+        "id": "7548ca347be59fba",
+        "type": "function",
+        "z": "bda95e6aeb04a072",
+        "name": "Save Results",
+        "func": "if (!msg.allResults) msg.allResults = []\nmsg.allResults.push(msg.payload)\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2170,
+        "y": 440,
+        "wires": [
+            [
+                "41fbfa77b8e00f02"
+            ]
+        ]
+    },
+    {
+        "id": "326507250300322b",
+        "type": "function",
+        "z": "bda95e6aeb04a072",
+        "name": "Rate Limited",
+        "func": "msg.delay = (msg.headers[\"x-ratelimit-reset\"] || 5) * 1000\n//node.warn(\"rate limiting applied\")\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2170,
+        "y": 500,
+        "wires": [
+            [
+                "1e0789820278e927"
+            ]
+        ]
+    },
+    {
+        "id": "f8defa0bf653d776",
+        "type": "function",
+        "z": "bda95e6aeb04a072",
+        "name": "Clean Up",
+        "func": "msg.payload = msg.allResults\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2700,
+        "y": 500,
+        "wires": [
+            [
+                "eb8bd76bd0f5c0da",
+                "e895d42e0c86126c"
+            ]
+        ]
+    },
+    {
+        "id": "98b51ec0fe31d41b",
+        "type": "switch",
+        "z": "bda95e6aeb04a072",
+        "name": "Result Status?",
+        "property": "statusCode",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "200",
+                "vt": "num"
+            },
+            {
+                "t": "eq",
+                "v": "429",
+                "vt": "num"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 3,
+        "x": 1940,
+        "y": 500,
+        "wires": [
+            [
+                "7548ca347be59fba"
+            ],
+            [
+                "326507250300322b"
+            ],
+            [
+                "2324a23966d2ad87"
+            ]
+        ]
+    },
+    {
+        "id": "2324a23966d2ad87",
+        "type": "function",
+        "z": "bda95e6aeb04a072",
+        "name": "Error Response",
+        "func": "msg.payload = {\n    fail: [{\n        responseCode: msg.statusCode\n    }]\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2180,
+        "y": 560,
+        "wires": [
+            [
+                "7548ca347be59fba"
+            ]
+        ]
+    },
+    {
+        "id": "123b32863f5e30b0",
+        "type": "json",
+        "z": "bda95e6aeb04a072",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 1750,
+        "y": 480,
+        "wires": [
+            [
+                "98b51ec0fe31d41b"
+            ]
+        ]
+    },
+    {
+        "id": "d4d7c7a4cdb5899b",
+        "type": "catch",
+        "z": "bda95e6aeb04a072",
+        "name": "",
+        "scope": [
+            "123b32863f5e30b0"
+        ],
+        "uncaught": false,
+        "x": 1750,
+        "y": 520,
+        "wires": [
+            [
+                "98b51ec0fe31d41b"
+            ]
+        ]
+    },
+    {
+        "id": "4136fedab88c06b2",
+        "type": "switch",
+        "z": "bda95e6aeb04a072",
+        "name": "New Paged?",
+        "property": "payload.meta.nextPage",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "nnull"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 2530,
+        "y": 460,
+        "wires": [
+            [
+                "a9dbe3574b3076ec"
+            ],
+            [
+                "f8defa0bf653d776"
+            ]
+        ]
+    },
+    {
+        "id": "a9dbe3574b3076ec",
+        "type": "function",
+        "z": "bda95e6aeb04a072",
+        "name": "Make another API call",
+        "func": "msg.data.pageToken = msg.payload.meta.nextPage\n\nmsg.headers = {}\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2740,
+        "y": 440,
+        "wires": [
+            [
+                "1d6efe36ed2a5bce"
+            ]
+        ]
+    },
+    {
+        "id": "6993e646ff7320cc",
+        "type": "link in",
+        "z": "bda95e6aeb04a072",
+        "name": "New API Call",
+        "links": [
+            "1d6efe36ed2a5bce",
+            "34511934337603a8",
+            "c8bb751d669d12c8"
+        ],
+        "x": 450,
+        "y": 540,
+        "wires": [
+            [
+                "e42270852f4db1f5"
+            ]
+        ],
+        "l": true
+    },
+    {
+        "id": "34511934337603a8",
+        "type": "link out",
+        "z": "bda95e6aeb04a072",
+        "name": "New API Call",
+        "mode": "link",
+        "links": [
+            "6993e646ff7320cc"
+        ],
+        "x": 2760,
+        "y": 400,
+        "wires": [],
+        "l": true
+    },
+    {
+        "id": "1d6efe36ed2a5bce",
+        "type": "link out",
+        "z": "bda95e6aeb04a072",
+        "name": "New API Call",
+        "mode": "link",
+        "links": [
+            "6993e646ff7320cc"
+        ],
+        "x": 2940,
+        "y": 440,
+        "wires": [],
+        "l": true
+    },
+    {
+        "id": "c8bb751d669d12c8",
+        "type": "link out",
+        "z": "bda95e6aeb04a072",
+        "name": "link out 69",
+        "mode": "link",
+        "links": [
+            "6993e646ff7320cc"
+        ],
+        "x": 2585,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "c2dfd088f5d3d305",
+        "type": "switch",
+        "z": "bda95e6aeb04a072",
+        "name": "Debug?",
+        "property": "debug",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "true"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 1200,
+        "y": 100,
+        "wires": [
+            [
+                "4dd29c7e1241e875"
+            ]
+        ]
+    },
+    {
+        "id": "7f957ea59c4e1b37",
+        "type": "switch",
+        "z": "bda95e6aeb04a072",
+        "name": "Debug?",
+        "property": "debug",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "true"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 1200,
+        "y": 200,
+        "wires": [
+            [
+                "b542307256f111ba"
+            ]
+        ]
+    },
+    {
+        "id": "4dd29c7e1241e875",
+        "type": "debug",
+        "z": "bda95e6aeb04a072",
+        "name": "API 2.0 Debug Request",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1410,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "b542307256f111ba",
+        "type": "debug",
+        "z": "bda95e6aeb04a072",
+        "name": "API 2.0 Debug Response",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1410,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "4a0c9cfae9d6c948",
+        "type": "link in",
+        "z": "bda95e6aeb04a072",
+        "name": "link in 7",
+        "links": [
+            "8d2e28c98449579f"
+        ],
+        "x": 1085,
+        "y": 120,
+        "wires": [
+            [
+                "c2dfd088f5d3d305",
+                "6b5fad354be41de2"
+            ]
+        ]
+    },
+    {
+        "id": "8d2e28c98449579f",
+        "type": "link out",
+        "z": "bda95e6aeb04a072",
+        "name": "link out 70",
+        "mode": "link",
+        "links": [
+            "4a0c9cfae9d6c948"
+        ],
+        "x": 1535,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "4b595ee8fb01ce93",
+        "type": "link out",
+        "z": "bda95e6aeb04a072",
+        "name": "link out 71",
+        "mode": "link",
+        "links": [
+            "8f85b99e4814f833"
+        ],
+        "x": 1635,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "8f85b99e4814f833",
+        "type": "link in",
+        "z": "bda95e6aeb04a072",
+        "name": "link in 8",
+        "links": [
+            "4b595ee8fb01ce93"
+        ],
+        "x": 1085,
+        "y": 220,
+        "wires": [
+            [
+                "7f957ea59c4e1b37",
+                "dfacd221cb03e7e4"
+            ]
+        ]
+    },
+    {
+        "id": "c659c462d395c336",
+        "type": "link in",
+        "z": "bda95e6aeb04a072",
+        "name": "Subflow Status",
+        "links": [
+            "e72ec2870c78b178",
+            "1617e1496fcc400d",
+            "b9892253355e964a",
+            "cd81f5bba574cae7",
+            "829e73faede07bc6"
+        ],
+        "x": 1900,
+        "y": 140,
+        "wires": [
+            []
+        ],
+        "l": true
+    },
+    {
+        "id": "e72ec2870c78b178",
+        "type": "link out",
+        "z": "bda95e6aeb04a072",
+        "name": "Set Status",
+        "mode": "link",
+        "links": [
+            "c659c462d395c336"
+        ],
+        "x": 600,
+        "y": 460,
+        "wires": [],
+        "l": true
+    },
+    {
+        "id": "4b154388a50296bf",
+        "type": "function",
+        "z": "bda95e6aeb04a072",
+        "name": "In progress",
+        "func": "msg.payload = {\n    fill:\"blue\",\n    shape:\"dot\",\n    text:\"Starting\"\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 460,
+        "wires": [
+            [
+                "e72ec2870c78b178"
+            ]
+        ]
+    },
+    {
+        "id": "eb8bd76bd0f5c0da",
+        "type": "function",
+        "z": "bda95e6aeb04a072",
+        "name": "Done Status",
+        "func": "msg.payload = {\n    fill: \"green\",\n    shape: \"dot\",\n    text: `Request Complete`\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2870,
+        "y": 520,
+        "wires": [
+            [
+                "1617e1496fcc400d"
+            ]
+        ]
+    },
+    {
+        "id": "2398a75c0ddcc6b3",
+        "type": "function",
+        "z": "bda95e6aeb04a072",
+        "name": "Error Status",
+        "func": "msg.payload = {\n    fill:\"red\",\n    shape:\"dot\",\n    text:\"Failed\"\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1910,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5f04b259bbcd4447",
+        "type": "catch",
+        "z": "bda95e6aeb04a072",
+        "name": "",
+        "scope": null,
+        "uncaught": true,
+        "x": 1740,
+        "y": 180,
+        "wires": [
+            [
+                "2398a75c0ddcc6b3",
+                "654af5860dcbd495"
+            ]
+        ]
+    },
+    {
+        "id": "1617e1496fcc400d",
+        "type": "link out",
+        "z": "bda95e6aeb04a072",
+        "name": "Set Status",
+        "mode": "link",
+        "links": [
+            "c659c462d395c336"
+        ],
+        "x": 3050,
+        "y": 520,
+        "wires": [],
+        "l": true
+    },
+    {
+        "id": "b9892253355e964a",
+        "type": "link out",
+        "z": "bda95e6aeb04a072",
+        "name": "Set Status",
+        "mode": "link",
+        "links": [
+            "c659c462d395c336"
+        ],
+        "x": 1380,
+        "y": 620,
+        "wires": [],
+        "l": true
+    },
+    {
+        "id": "01d374cd8c1502b6",
+        "type": "function",
+        "z": "bda95e6aeb04a072",
+        "name": "In progress",
+        "func": "msg.payload = {\n    fill:\"blue\",\n    shape:\"dot\",\n    text:\"Getting new token\"\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1210,
+        "y": 620,
+        "wires": [
+            [
+                "b9892253355e964a"
+            ]
+        ]
+    },
+    {
+        "id": "cd81f5bba574cae7",
+        "type": "link out",
+        "z": "bda95e6aeb04a072",
+        "name": "Set Status",
+        "mode": "link",
+        "links": [
+            "c659c462d395c336"
+        ],
+        "x": 1390,
+        "y": 140,
+        "wires": [],
+        "l": true
+    },
+    {
+        "id": "6b5fad354be41de2",
+        "type": "function",
+        "z": "bda95e6aeb04a072",
+        "name": "In progress",
+        "func": "msg.payload = {\n    fill:\"blue\",\n    shape:\"dot\",\n    text:\"Making Request\"\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1210,
+        "y": 140,
+        "wires": [
+            [
+                "cd81f5bba574cae7"
+            ]
+        ]
+    },
+    {
+        "id": "829e73faede07bc6",
+        "type": "link out",
+        "z": "bda95e6aeb04a072",
+        "name": "Set Status",
+        "mode": "link",
+        "links": [
+            "c659c462d395c336"
+        ],
+        "x": 1390,
+        "y": 240,
+        "wires": [],
+        "l": true
+    },
+    {
+        "id": "dfacd221cb03e7e4",
+        "type": "function",
+        "z": "bda95e6aeb04a072",
+        "name": "In progress",
+        "func": "msg.payload = {\n    fill:\"blue\",\n    shape:\"dot\",\n    text:\"Received Response\"\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1210,
+        "y": 240,
+        "wires": [
+            [
+                "829e73faede07bc6"
+            ]
+        ]
+    },
+    {
+        "id": "8d7c30a945c47daa",
+        "type": "subflow:5dd2f21a034d4142",
+        "z": "bda95e6aeb04a072",
+        "name": "",
+        "x": 250,
+        "y": 500,
+        "wires": [
+            [
+                "bfbc66999ee85855"
+            ]
+        ]
+    },
+    {
+        "id": "4d2f8bd1c5d3066a",
+        "type": "subflow:768d49cee95a9222",
+        "z": "bda95e6aeb04a072",
+        "name": "",
+        "x": 1800,
+        "y": 580,
+        "wires": [
+            [
+                "b26f5e7608dde68e"
+            ]
+        ]
+    },
+    {
+        "id": "e895d42e0c86126c",
+        "type": "subflow:768d49cee95a9222",
+        "z": "bda95e6aeb04a072",
+        "name": "",
+        "x": 2880,
+        "y": 480,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "654af5860dcbd495",
+        "type": "debug",
+        "z": "bda95e6aeb04a072",
+        "name": "debug 30",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1900,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "037cd4ba96d39b71",
+        "type": "subflow:5dd2f21a034d4142",
+        "z": "bda95e6aeb04a072",
+        "name": "",
+        "x": 830,
+        "y": 580,
+        "wires": [
+            [
+                "cb1b0d55a331b8af"
+            ]
+        ]
+    },
+    {
+        "id": "25f8f84a.4e7f98",
+        "type": "tls-config",
+        "name": "Verify Certificate",
+        "cert": "",
+        "key": "",
+        "ca": "",
+        "certname": "",
+        "keyname": "",
+        "caname": "",
+        "servername": "",
+        "verifyservercert": true
+    },
+    {
+        "id": "c9770bf7886625a1",
+        "type": "link in",
+        "z": "5052831abf174a2e",
+        "g": "bb2022c0266d2fc5",
+        "name": "Parse Standard Response",
+        "links": [],
+        "x": 780,
+        "y": 120,
+        "wires": [
+            [
+                "9bb4dbad4148188c"
+            ]
+        ],
+        "l": true
+    },
+    {
+        "id": "7577ab7720c72a21",
+        "type": "link out",
+        "z": "5052831abf174a2e",
+        "g": "bb2022c0266d2fc5",
+        "name": "link out 68",
+        "mode": "return",
+        "links": [],
+        "x": 1155,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "9bb4dbad4148188c",
+        "type": "function",
+        "z": "5052831abf174a2e",
+        "g": "bb2022c0266d2fc5",
+        "name": "Parse Response",
+        "func": "var input = msg.payload\nvar result = []\n\nif (input[0].fail && input[0].fail.length > 0) {\n    result = [{\n        errors: input[0].fail,\n    }]\n\n    try {\n        result.requestId = msg.headers[\"x-request-id\"]\n        result.date = msg.headers.date\n    }\n    catch {}\n} \nelse if (msg.parseField) {\n    input.forEach (a => {\n        result.push(...a.data[0][msg.parseField])\n    })\n    delete msg.parseField\n}\nelse if (input.length >= 1) {\n    input.forEach(a => {\n        if (a.data.length === 1 && Object.keys(a.data[0]).length === 1) {\n            var key = Object.keys(a.data[0])[0]\n            result.push(...(a.data[0][key]))\n        }\n        else {\n            result.push(...a.data)\n        }\n    })\n}\nelse {\n    result = input\n}\n\n/*if (result.length === 1) {\n    result = result[0]\n}*/\n\nmsg.payload = result\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1010,
+        "y": 120,
+        "wires": [
+            [
+                "7577ab7720c72a21"
+            ]
+        ]
+    },
+    {
+        "id": "f995512af6914478",
+        "type": "function",
+        "z": "5052831abf174a2e",
+        "g": "bb2022c0266d2fc5",
+        "name": "Standard field normalization",
+        "func": "function toIsoString(date) {\n    date = new Date(date)\n    var tzo = -date.getTimezoneOffset(),\n        dif = tzo >= 0 ? '+' : '-',\n        pad = function (num) {\n            return (num < 10 ? '0' : '') + num;\n        };\n\n    return date.getFullYear() +\n        '-' + pad(date.getMonth() + 1) +\n        '-' + pad(date.getDate()) +\n        'T' + pad(date.getHours()) +\n        ':' + pad(date.getMinutes()) +\n        ':' + pad(date.getSeconds()) +\n        dif + pad(Math.floor(Math.abs(tzo) / 60)) +\n        pad(Math.abs(tzo) % 60);\n}\n\n// -------------------\n\nvar request = msg.payload.data || {}\n\n//Start Date\nif (request.start) {\n    request.start = toIsoString(request.start)\n}\n\n// End Date\nif (request.end) {\n    request.end = toIsoString(request.end)\n}\n\n// Search\nif (request.search) {\n    var searchKey = Object.keys(request.search)[0] \n    request.searchBy = {\n        fieldName: searchKey,\n        value: request.search[searchKey]\n    }\n    delete request.search\n}\n\n// Filters\nif (request.filters) {\n    var filters = []\n    var filterKeys = Object.keys(request.search)\n    filterKeys.forEach(key => {\n        filters.push({\n            fieldName: key,\n            value: request.filters[key]\n        })\n    })\n    request.filterBy = filters\n    delete request.filters\n}\n\nmsg.payload.data = request\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1580,
+        "y": 140,
+        "wires": [
+            [
+                "35b8f06cf08388bf"
+            ]
+        ]
+    },
+    {
+        "id": "abc3daee91098854",
+        "type": "link in",
+        "z": "5052831abf174a2e",
+        "g": "bb2022c0266d2fc5",
+        "name": "Normalize Request",
+        "links": [],
+        "x": 1340,
+        "y": 140,
+        "wires": [
+            [
+                "f995512af6914478"
+            ]
+        ],
+        "l": true
+    },
+    {
+        "id": "35b8f06cf08388bf",
+        "type": "link out",
+        "z": "5052831abf174a2e",
+        "g": "bb2022c0266d2fc5",
+        "name": "link out 69",
+        "mode": "return",
+        "links": [],
+        "x": 1745,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "cb9868a3e202d6da",
+        "type": "catch",
+        "z": "5052831abf174a2e",
+        "g": "bb2022c0266d2fc5",
+        "name": "",
+        "scope": [
+            "9bb4dbad4148188c"
+        ],
+        "uncaught": false,
+        "x": 840,
+        "y": 160,
+        "wires": [
+            [
+                "4f7f0ee6fb62d672"
+            ]
+        ]
+    },
+    {
+        "id": "4f7f0ee6fb62d672",
+        "type": "change",
+        "z": "5052831abf174a2e",
+        "g": "bb2022c0266d2fc5",
+        "name": "",
+        "rules": [
+            {
+                "t": "delete",
+                "p": "error",
+                "pt": "msg"
+            },
+            {
+                "t": "delete",
+                "p": "_error",
+                "pt": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1010,
+        "y": 160,
+        "wires": [
+            [
+                "7577ab7720c72a21"
+            ]
+        ]
+    },
+    {
+        "id": "84afa2e9713b720d",
+        "type": "subflow:bda95e6aeb04a072",
+        "z": "5052831abf174a2e",
+        "g": "bb2022c0266d2fc5",
+        "name": "",
+        "env": [
+            {
+                "name": "authClientId",
+                "type": "cred"
+            },
+            {
+                "name": "authClientSecret",
+                "type": "cred"
+            }
+        ],
+        "x": 400,
+        "y": 140,
+        "wires": [
+            [
+                "f49a450b51d2c0b9"
+            ]
+        ]
+    },
+    {
+        "id": "588466b11a2c2ab5",
+        "type": "link in",
+        "z": "5052831abf174a2e",
+        "g": "bb2022c0266d2fc5",
+        "name": "Make API Call",
+        "links": [],
+        "x": 170,
+        "y": 140,
+        "wires": [
+            [
+                "84afa2e9713b720d"
+            ]
+        ],
+        "l": true
+    },
+    {
+        "id": "f49a450b51d2c0b9",
+        "type": "link out",
+        "z": "5052831abf174a2e",
+        "g": "bb2022c0266d2fc5",
+        "name": "link out 72",
+        "mode": "return",
+        "links": [],
+        "x": 565,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "05fe94d7312c5015",
+        "type": "group",
+        "z": "5052831abf174a2e",
+        "name": "Get Account",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "d41a6e7da0b3f1e2",
+            "73f1ef5c6d20d8d2",
+            "73c7a7686322b0fd",
+            "8f38786677c038bd",
+            "3f2235fcb6cd664d",
+            "6edfc7183bf7995c",
+            "ee9b84f09d3513cd",
+            "85a9cec1e7c9d5bf"
+        ],
+        "x": 74,
+        "y": 239,
+        "w": 912,
+        "h": 122
+    },
+    {
+        "id": "d41a6e7da0b3f1e2",
+        "type": "link in",
+        "z": "5052831abf174a2e",
+        "g": "05fe94d7312c5015",
+        "name": "Get Account",
+        "links": [],
+        "x": 170,
+        "y": 280,
+        "wires": [
+            [
+                "3f2235fcb6cd664d"
+            ]
+        ],
+        "l": true
+    },
+    {
+        "id": "73f1ef5c6d20d8d2",
+        "type": "link out",
+        "z": "5052831abf174a2e",
+        "g": "05fe94d7312c5015",
+        "name": "link out 73",
+        "mode": "return",
+        "links": [],
+        "x": 945,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "73c7a7686322b0fd",
+        "type": "link call",
+        "z": "5052831abf174a2e",
+        "g": "05fe94d7312c5015",
+        "name": "",
+        "links": [
+            "c9770bf7886625a1"
+        ],
+        "linkType": "static",
+        "timeout": "30",
+        "x": 780,
+        "y": 280,
+        "wires": [
+            [
+                "73f1ef5c6d20d8d2"
+            ]
+        ]
+    },
+    {
+        "id": "8f38786677c038bd",
+        "type": "link call",
+        "z": "5052831abf174a2e",
+        "g": "05fe94d7312c5015",
+        "name": "",
+        "links": [
+            "588466b11a2c2ab5"
+        ],
+        "linkType": "static",
+        "timeout": "30",
+        "x": 540,
+        "y": 280,
+        "wires": [
+            [
+                "73c7a7686322b0fd"
+            ]
+        ]
+    },
+    {
+        "id": "3f2235fcb6cd664d",
+        "type": "function",
+        "z": "5052831abf174a2e",
+        "g": "05fe94d7312c5015",
+        "name": "Set Call Info",
+        "func": "msg.payload = msg.payload ?? {}\nmsg.payload.uri = '/api/account/get-account';\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 280,
+        "wires": [
+            [
+                "8f38786677c038bd"
+            ]
+        ]
+    },
+    {
+        "id": "6edfc7183bf7995c",
+        "type": "inject",
+        "z": "5052831abf174a2e",
+        "g": "05fe94d7312c5015",
+        "name": "Get Account Info",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "Get Mimecast Account Info",
+        "x": 260,
+        "y": 320,
+        "wires": [
+            [
+                "ee9b84f09d3513cd"
+            ]
+        ]
+    },
+    {
+        "id": "ee9b84f09d3513cd",
+        "type": "link call",
+        "z": "5052831abf174a2e",
+        "g": "05fe94d7312c5015",
+        "name": "",
+        "links": [
+            "d41a6e7da0b3f1e2"
+        ],
+        "linkType": "static",
+        "timeout": "30",
+        "x": 530,
+        "y": 320,
+        "wires": [
+            [
+                "85a9cec1e7c9d5bf"
+            ]
+        ]
+    },
+    {
+        "id": "85a9cec1e7c9d5bf",
+        "type": "debug",
+        "z": "5052831abf174a2e",
+        "g": "05fe94d7312c5015",
+        "name": "Mimecast Account Info",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 750,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "baaef93772a7f24a",
+        "type": "group",
+        "z": "5052831abf174a2e",
+        "name": "Get Attachment Protection Logs",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "63c8fdf57263ca1d",
+            "0038acea28353f3e",
+            "dfcd9167b7ed6686",
+            "4486a9880cf97624",
+            "8274f9398f5c08bf",
+            "a6fc4f864b559002",
+            "c1d93bf8e0246f92",
+            "e767278c985ccb81"
+        ],
+        "x": 74,
+        "y": 379,
+        "w": 1072,
+        "h": 122
+    },
+    {
+        "id": "63c8fdf57263ca1d",
+        "type": "function",
+        "z": "5052831abf174a2e",
+        "g": "baaef93772a7f24a",
+        "name": "Set URI",
+        "func": "msg.payload.uri = \"/api/ttp/attachment/get-logs\"\nmsg.parseField = \"attachmentLogs\"\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 420,
+        "wires": [
+            [
+                "dfcd9167b7ed6686"
+            ]
+        ]
+    },
+    {
+        "id": "0038acea28353f3e",
+        "type": "link in",
+        "z": "5052831abf174a2e",
+        "g": "baaef93772a7f24a",
+        "name": "Get TTP Attachment Protection Logs",
+        "links": [],
+        "x": 250,
+        "y": 420,
+        "wires": [
+            [
+                "63c8fdf57263ca1d"
+            ]
+        ],
+        "l": true
+    },
+    {
+        "id": "dfcd9167b7ed6686",
+        "type": "link call",
+        "z": "5052831abf174a2e",
+        "g": "baaef93772a7f24a",
+        "name": "",
+        "links": [
+            "588466b11a2c2ab5"
+        ],
+        "linkType": "static",
+        "timeout": "30",
+        "x": 680,
+        "y": 420,
+        "wires": [
+            [
+                "4486a9880cf97624"
+            ]
+        ]
+    },
+    {
+        "id": "4486a9880cf97624",
+        "type": "link call",
+        "z": "5052831abf174a2e",
+        "g": "baaef93772a7f24a",
+        "name": "",
+        "links": [
+            "c9770bf7886625a1"
+        ],
+        "linkType": "static",
+        "timeout": "30",
+        "x": 920,
+        "y": 420,
+        "wires": [
+            [
+                "8274f9398f5c08bf"
+            ]
+        ]
+    },
+    {
+        "id": "8274f9398f5c08bf",
+        "type": "link out",
+        "z": "5052831abf174a2e",
+        "g": "baaef93772a7f24a",
+        "name": "link out 113",
+        "mode": "return",
+        "links": [],
+        "x": 1085,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "a6fc4f864b559002",
+        "type": "inject",
+        "z": "5052831abf174a2e",
+        "g": "baaef93772a7f24a",
+        "name": "Get Attachment Protect Logs",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "Get Mimecast Attachment Protect Logs",
+        "payload": "{\"uri\":\"/api/ttp/attachment/get-logs\",\"meta\":{\"pagination\":{\"pageSize\":100}},\"data\":{\"route\":\"inbound\"},\"parseField\":\"attachmentLogs\"}",
+        "payloadType": "json",
+        "x": 300,
+        "y": 460,
+        "wires": [
+            [
+                "c1d93bf8e0246f92"
+            ]
+        ]
+    },
+    {
+        "id": "c1d93bf8e0246f92",
+        "type": "link call",
+        "z": "5052831abf174a2e",
+        "g": "baaef93772a7f24a",
+        "name": "",
+        "links": [
+            "1eda6558a0fa9a56"
+        ],
+        "linkType": "static",
+        "timeout": "30",
+        "x": 610,
+        "y": 460,
+        "wires": [
+            [
+                "e767278c985ccb81"
+            ]
+        ]
+    },
+    {
+        "id": "e767278c985ccb81",
+        "type": "debug",
+        "z": "5052831abf174a2e",
+        "g": "baaef93772a7f24a",
+        "name": "Mimecast Attachment Protect Results",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 950,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "dd9ff8af9b49a897",
+        "type": "group",
+        "z": "5052831abf174a2e",
+        "name": "Mimecast Message Tracking",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "28b2bb5d9d34999e",
+            "3302117c77f6095f",
+            "22ac629cb7fcb541",
+            "e6510f69374da90c",
+            "86c352ea89a6a5b2",
+            "8bf7b9bd02fb39ec",
+            "ba02a89b1f3d9d04",
+            "08317eb4633c13c8",
+            "a0c3b335181f0a6d"
+        ],
+        "x": 74,
+        "y": 519,
+        "w": 1152,
+        "h": 122
+    },
+    {
+        "id": "28b2bb5d9d34999e",
+        "type": "link call",
+        "z": "5052831abf174a2e",
+        "g": "dd9ff8af9b49a897",
+        "name": "",
+        "links": [
+            "811b3be6b9a3131b"
+        ],
+        "linkType": "static",
+        "timeout": "30",
+        "x": 410,
+        "y": 560,
+        "wires": [
+            [
+                "22ac629cb7fcb541"
+            ]
+        ]
+    },
+    {
+        "id": "3302117c77f6095f",
+        "type": "link in",
+        "z": "5052831abf174a2e",
+        "g": "dd9ff8af9b49a897",
+        "name": "Search Messages",
+        "links": [],
+        "x": 190,
+        "y": 560,
+        "wires": [
+            [
+                "28b2bb5d9d34999e"
+            ]
+        ],
+        "l": true
+    },
+    {
+        "id": "22ac629cb7fcb541",
+        "type": "function",
+        "z": "5052831abf174a2e",
+        "g": "dd9ff8af9b49a897",
+        "name": "Set URI",
+        "func": "msg.payload = msg.payload ?? {}\nmsg.payload.uri = \"/api/message-finder/search\"\nmsg.parseField = \"trackedEmails\"\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 600,
+        "y": 560,
+        "wires": [
+            [
+                "e6510f69374da90c"
+            ]
+        ]
+    },
+    {
+        "id": "e6510f69374da90c",
+        "type": "link call",
+        "z": "5052831abf174a2e",
+        "g": "dd9ff8af9b49a897",
+        "name": "",
+        "links": [
+            "588466b11a2c2ab5"
+        ],
+        "linkType": "static",
+        "timeout": "30",
+        "x": 780,
+        "y": 560,
+        "wires": [
+            [
+                "86c352ea89a6a5b2"
+            ]
+        ]
+    },
+    {
+        "id": "86c352ea89a6a5b2",
+        "type": "link call",
+        "z": "5052831abf174a2e",
+        "g": "dd9ff8af9b49a897",
+        "name": "",
+        "links": [
+            "c9770bf7886625a1"
+        ],
+        "linkType": "static",
+        "timeout": "30",
+        "x": 1020,
+        "y": 560,
+        "wires": [
+            [
+                "8bf7b9bd02fb39ec"
+            ]
+        ]
+    },
+    {
+        "id": "8bf7b9bd02fb39ec",
+        "type": "link out",
+        "z": "5052831abf174a2e",
+        "g": "dd9ff8af9b49a897",
+        "name": "link out 114",
+        "mode": "return",
+        "links": [],
+        "x": 1185,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "ba02a89b1f3d9d04",
+        "type": "inject",
+        "z": "5052831abf174a2e",
+        "g": "dd9ff8af9b49a897",
+        "name": "Search for Mesasges",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "Search Mimecast for Mesasges",
+        "payload": "{\"uri\":\"/api/message-finder/search\",\"meta\":{\"pagination\":{\"pageSize\":100}},\"data\":{\"advancedTrackAndTraceOptions\":{\"from\":\"gmail.com\"}},\"parseField\":\"trackedEmails\"}",
+        "payloadType": "json",
+        "x": 300,
+        "y": 600,
+        "wires": [
+            [
+                "08317eb4633c13c8"
+            ]
+        ]
+    },
+    {
+        "id": "08317eb4633c13c8",
+        "type": "link call",
+        "z": "5052831abf174a2e",
+        "g": "dd9ff8af9b49a897",
+        "name": "",
+        "links": [
+            "3302117c77f6095f"
+        ],
+        "linkType": "static",
+        "timeout": "30",
+        "x": 530,
+        "y": 600,
+        "wires": [
+            [
+                "a0c3b335181f0a6d"
+            ]
+        ]
+    },
+    {
+        "id": "a0c3b335181f0a6d",
+        "type": "debug",
+        "z": "5052831abf174a2e",
+        "g": "dd9ff8af9b49a897",
+        "name": "Mimecast Messages",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 760,
+        "y": 600,
+        "wires": []
+    }
+]
